@@ -23,7 +23,7 @@
         <!--指定mybatis全局配置文件位置-->
         <property name="configLocation" value="classpath:mybatis-config.xml"></property>
         <!--指定数据源的配置-->
-        <property name="dataSource" value="pooledDataSource"></property>
+        <property name="dataSource" ref="pooledDataSource"></property>
         <!--指定mybatis，mapper文件的位置-->
         <property name="mapperLocations" value="classpath:mapper/*.xml"></property>
     </bean>

@@ -83,36 +83,36 @@
     <div class="row">
         <!--分页文字信息  -->
         <div class="col-md-6" id="page_info_area">
-            当前 页，总 页，总 条记录
+            <%--当前第${pageInfo.PageNum}页,总共${pageInfo.pages}页,总共${pageInfo.Total}个员工--%>
         </div>
         <!-- 分页条信息 -->
         <div class="col-md-4 col-md-offset-4" id="page_nav_area">
+            <ul class="pagination">
+                <li><a href="#">首页</a> </li>
+                <li>
+                    <a href="#" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                <c:forEach items="${pageInfo.navigatepageNums}" var="page_Num">
+                    <c:if test="${page_Num==pageInfo.pageNum}">
+                        <li class="active"><a href="#">${pageNum}</a> </li>
+                    </c:if>
 
+                </c:forEach>
+                <li>
+                    <a href="#" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                <li><a href="#">末页</a> </li>
+            </ul>
         </div>
     </div>
 
 
 </div>
-<script type="text/javascript">
-    //1.页面加载完成后发送一个ajax请求，请求分页数据
-    $(function () {
-        $.ajax({
-            url:"${APP_PATH}/emps",
-            data:"pageNumber=1",
-            type:"get",
-            success:function (result) {
-                console.log(result)
-                //1.解析并显示员工数据
 
-
-
-
-                //2析并显示分页信息
-
-            }
-        })
-    })
-</script>
 
 
 
