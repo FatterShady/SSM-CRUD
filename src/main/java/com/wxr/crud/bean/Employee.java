@@ -1,9 +1,9 @@
 package com.wxr.crud.bean;
 
 public class Employee {
-    private Integer empId;
-
     private String empName;
+
+    private Integer empId;
 
     private String gender;
 
