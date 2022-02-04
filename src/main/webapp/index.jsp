@@ -73,11 +73,7 @@
     </div>
 </div>
 
-
-
-
 <!-- 修改员工信息的模态框，Bootstrap代码 -->
-
 <div class="modal fade" id="empUpdateModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -129,12 +125,8 @@
     </div>
 </div>
 
-
-
-
-
-
-
+    <%--************************************************************************************************************************************************--%>
+<%--主体--%>
 <div class="container">
     <!-- 标题 -->
     <div class="row">
@@ -190,28 +182,34 @@
 
 </div>
 <script type="text/javascript">
+    <%--全局变量用来记录总记录数--%>
     var totalRecord;
 
-    //1.页面加载完成后发送一个ajax请求，请求分页数据
-    $(function () {
-        $.ajax({
-            url: "${APP_PATH}/emps",
-            data: "pageNumber=1",
-            type: "get",
-            success: function (result) {
+    <%--************************************************************************************************************************************************--%>
 
-                //1.解析并显示员工数据
+    //跳转到指定页面
+    function to_page(pageNumber){
+        $.ajax({
+            url:"${APP_PATH}/emps",
+            data:"pageNumber="+pageNumber,
+            type:"GET",
+
+            //result获取到了返回的Msg对象(JSON数据)
+            success:function(result){
+
+                //1、解析并显示员工数据
                 build_emps_table(result);
 
-                //2.解析并显示分页信息
+                //2、解析并显示分页信息
                 build_page_info(result);
 
-                //3.解析并显示分页条信息
+                //3、解析显示分页条数据
                 build_page_nav(result);
             }
-        })
-    })
+        });
+    }
 
+    //创建员工表格
     function build_emps_table(result) {
         //清空table表格
         $("#emps_table tbody").empty();
@@ -345,33 +343,34 @@
         navEle.appendTo("#page_nav_area");
     }
 
-    //跳转到指定页面
-    function to_page(pageNumber){
+    //页面加载完成后发送一个ajax请求，请求分页数据
+    $(function () {
         $.ajax({
-            url:"${APP_PATH}/emps",
-            data:"pageNumber="+pageNumber,
-            type:"GET",
+            url: "${APP_PATH}/emps",
+            data: "pageNumber",
+            type: "get",
+            success: function (result) {
 
-            //result获取到了返回的Msg对象(JSON数据)
-            success:function(result){
-
-                //1、解析并显示员工数据
+                //1.解析并显示员工数据
                 build_emps_table(result);
 
-                //2、解析并显示分页信息
+                //2.解析并显示分页信息
                 build_page_info(result);
 
-                //3、解析显示分页条数据
+                //3.解析并显示分页条信息
                 build_page_nav(result);
             }
-        });
-    }
+        })
+    })
+
+    <%--************************************************************************************************************************************************--%>
 
     //点击新增按钮弹出模态框
     $("#emp_add_modal_btn").click(function(){
 
-       //调用函数清除模态框的所有数据数据，防止上一次信息残留
-       //  reset_form("#empAddModal form");
+        //调用函数清除模态框的所有数据数据，防止上一次信息残留
+        //  reset_form("#empAddModal form");
+        $("#empAddModal select").empty()
 
         //调用函数发送ajax请求，查出社团信息，显示在下拉列表(select标签)中
         getDepts();
@@ -380,7 +379,34 @@
         $("#empAddModal").modal({
             backdrop:"static"
         });
+
     });
+
+    //添加学生模态框的保存按钮的单击事件
+    $("#emp_save_btn").click(function () {
+
+
+        //1.先对要提交给服务器的数据进行校验
+        if(!validate_add_form()){
+            return false;
+        };
+
+
+        //2.模态框中的表单数据提交给服务器保存,发送ajax请求保存员工
+        $.ajax({
+            url:"${APP_PATH}/emp",
+            type:"POST",
+            data:$("#empAddModal form").serialize(),
+            success:function (result) {
+                //1.关闭模态框(Bootstrap代码)
+                $("#empAddModal").modal('hide');
+                //来到最后一页，显示刚才保存的数据
+                to_page(totalRecord);
+            }
+        })
+
+
+    })
 
     //查出所有部门信息并显示在下拉列表中
     function getDepts() {
@@ -397,24 +423,29 @@
         })
     }
 
-    //添加学生模态框的保存按钮的单击事件
-    $("#emp_save_btn").click(function () {
-        //1.模态框中的表单数据提交给服务器保存
-        //2.发送ajax请求保存员工
-        $.ajax({
-                url:"${APP_PATH}/emp",
-                type:"POST",
-                data:$("#empAddModal form").serialize(),
-                success:function (result) {
-                    //1.关闭模态框(Bootstrap代码)
-                    $("#empAddModal").modal('hide');
-                    //来到最后一页，显示刚才保存的数据
-                    to_page(totalRecord);
+    //校验表单数据
+    function validate_add_form() {
+        //用户名已在数据库中检查，此处无需再查
+        //校验邮箱信息
+        var email = $("#email_add_input").val();
+        var regEmail = /^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/;
+        if(!regEmail.test(email)){
+            //调用函数以指定的格式显示提示信息
+            // show_validate_msg("#email_add_input", "error", "邮箱格式不正确");
+            return false;
+        }else{
+            // show_validate_msg("#email_add_input", "success", "");
         }
-        })
+        return true;
+
+    }
+
+    <%--************************************************************************************************************************************************--%>
 
 
-    })
+
+
+
 
 
 </script>
