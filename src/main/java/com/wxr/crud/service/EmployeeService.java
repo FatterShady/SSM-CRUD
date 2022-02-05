@@ -36,4 +36,17 @@ public class EmployeeService {
     public void saveEmp(Employee employee) {
         employeeMapper.insertSelective(employee);
     }
+
+    /**
+     * 检验用户名是否可用
+     * @param empName
+     * @return true可用 false不可用
+     */
+    public boolean checkUser(String empName) {
+        EmployeeExample employeeExample=new EmployeeExample();
+        EmployeeExample.Criteria criteria = employeeExample.createCriteria();
+        criteria.andEmpNameEqualTo(empName);
+        long count = employeeMapper.countByExample(employeeExample);
+        return count == 0;
+    }
 }

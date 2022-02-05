@@ -48,7 +48,7 @@ public class EmployeeContorller {
     @ResponseBody
     @RequestMapping(value = "/emps")
     public Msg getEmpsWithJson(@RequestParam(value = "pageNumber",defaultValue = "1")Integer pageNumber){
-        PageHelper.startPage(pageNumber,2);
+        PageHelper.startPage(pageNumber,5);
         List<Employee> emps= employeeService.getAll("emp_id");
         //使用PageInfo查询被包装的结果，只需要把pageInfo交给页面即可
         PageInfo pageInfo=new PageInfo(emps);
@@ -66,4 +66,26 @@ public class EmployeeContorller {
         employeeService.saveEmp(employee);
         return Msg.success();
     }
+
+
+    /**
+     * 检查用户名是否存在
+     * @param empName
+     * @return
+     */
+    @RequestMapping("/checkUser")
+    @ResponseBody
+    public Msg checkUser(@RequestParam("empName") String empName){
+     boolean b= employeeService.checkUser(empName);
+     if(b){
+         return Msg.success();
+     }else {
+         return Msg.fail();
+     }
+
+
+    }
+
+
+
 }

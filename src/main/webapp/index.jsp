@@ -33,7 +33,7 @@
                     <div class="form-group">
                         <label class="col-sm-2 control-label">姓名</label>
                         <div class="col-sm-10">
-                            <input type="text" name="empName" class="form-control" id="empName_add_input" placeholder="请输入2-5位汉字">
+                            <input type="text" name="empName" class="form-control" id="empName_add_input" placeholder="请输入正确且不重复的用户名">
                             <span class="help-block"></span>
                         </div>
                     </div>
@@ -365,9 +365,36 @@
 
     <%--************************************************************************************************************************************************--%>
 
+
+    //通过内容发生改变事件和ajax请求校验填写的用户名是否已经存在于数据库
+    $("#empName_add_input").change(function(){
+        var empName = this.value;
+        //发送ajax请求
+        $.ajax({
+            url:"${APP_PATH}/checkUser",
+            data:"empName="+empName,
+            type:"POST",
+            success:function(result){
+                if(result.code==100){
+                    //调用函数以指定的格式显示提示信息
+                    show_validate_msg("#empName_add_input","success","学生姓名可用");
+                    //如果用户名可用，才让其保存，保存按钮添加属性
+                    $("#emp_save_btn").attr("ajax-va","success");
+                }else{
+                    show_validate_msg("#empName_add_input","error",result.extend.va_msg);
+                    //如果用户名不可用，不让其保存，保存按钮添加属性
+                    $("#emp_save_btn").attr("ajax-va","error");
+                }
+            }
+        });
+    });
+
+
     //点击新增按钮弹出模态框
     $("#emp_add_modal_btn").click(function(){
 
+        //清除表单数据
+        $("#empAddModal form")[0].reset()
         //调用函数清除模态框的所有数据数据，防止上一次信息残留
         //  reset_form("#empAddModal form");
         $("#empAddModal select").empty()
@@ -391,6 +418,10 @@
             return false;
         };
 
+        //判断之前的用户名校验是否成功，如果成功才继续往下执行
+        if($(this).attr("ajax-va")=="error"){
+            return false;
+        }
 
         //2.模态框中的表单数据提交给服务器保存,发送ajax请求保存员工
         $.ajax({
@@ -431,12 +462,28 @@
         var regEmail = /^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/;
         if(!regEmail.test(email)){
             //调用函数以指定的格式显示提示信息
-            // show_validate_msg("#email_add_input", "error", "邮箱格式不正确");
+            show_validate_msg("#email_add_input", "error", "邮箱格式不正确");
             return false;
         }else{
-            // show_validate_msg("#email_add_input", "success", "");
+            show_validate_msg("#email_add_input", "success", "");
         }
         return true;
+
+    }
+
+    //调用函数以指定的格式显示提示信息
+    function show_validate_msg(ele,status,msg){
+        //清除当前元素较严状态
+        $(ele).parent().removeClass("has-success has-error");
+
+        if("success"==status){
+            $(ele).parent().addClass("has-success");
+            $(ele).next("span").text(msg);
+        }else if("error"==status){
+            $(ele).parent().addClass("has-error");
+            $(ele).next("span").text(msg);
+        }
+
 
     }
 
