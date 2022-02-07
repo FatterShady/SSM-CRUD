@@ -16,3 +16,12 @@
 * 使用了 Spring - Test 与Junit 编写单元测试代码；  
 * 使用了 Restful 设计风格，以 AJAX 发送 PUT 与 DELETE 类型请求；  
 * 采用了双端校验，前端校验 JQuery，后端校验符合 JSR303 规范。
+
+# 流程图
+![](https://github.com/FatterShady/SSM-CRUD/blob/master/photos/%E6%B5%81%E7%A8%8B%E5%9B%BE.png)
+
+# 效果图
+![](https://github.com/FatterShady/SSM-CRUD/blob/master/photos/%E6%95%88%E6%9E%9C%E5%9B%BE1.png)
+![](https://github.com/FatterShady/SSM-CRUD/blob/master/photos/%E6%95%88%E6%9E%9C%E5%9B%BE4.png)
+![](https://github.com/FatterShady/SSM-CRUD/blob/master/photos/%E6%95%88%E6%9E%9C%E5%9B%BE2%20(2).png)
+![](https://github.com/FatterShady/SSM-CRUD/blob/master/photos/%E6%95%88%E6%9E%9C%E5%9B%BE3.png)
