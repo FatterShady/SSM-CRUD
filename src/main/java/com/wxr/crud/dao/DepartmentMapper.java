@@ -4,7 +4,9 @@ import com.wxr.crud.bean.Department;
 import com.wxr.crud.bean.DepartmentExample;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface DepartmentMapper {
     long countByExample(DepartmentExample example);
 

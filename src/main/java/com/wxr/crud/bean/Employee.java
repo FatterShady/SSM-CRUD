@@ -1,12 +1,18 @@
 package com.wxr.crud.bean;
 
+import org.hibernate.validator.constraints.Email;
+
+import javax.validation.constraints.Pattern;
+
 public class Employee {
+    @Pattern(regexp = "(^[A-Za-z0-9]{3,12}$)|^[\\u2E80-\\u9FFF]{2,5}",message = "用户名必须是3-12位数字或字母或者是2-5位的汉字")
     private String empName;
 
     private Integer empId;
 
     private String gender;
 
+    @Email
     private String email;
 
     private Integer dId;

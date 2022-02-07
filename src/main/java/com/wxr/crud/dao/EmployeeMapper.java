@@ -4,7 +4,9 @@ import com.wxr.crud.bean.Employee;
 import com.wxr.crud.bean.EmployeeExample;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface EmployeeMapper {
     long countByExample(EmployeeExample example);
 

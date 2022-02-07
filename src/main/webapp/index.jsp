@@ -182,8 +182,8 @@
 
 </div>
 <script type="text/javascript">
-    <%--全局变量用来记录总记录数--%>
-    var totalRecord;
+    <%--全局变量用来记录总记录数和当前页数--%>
+    var totalRecord,currentPage;
 
     <%--************************************************************************************************************************************************--%>
 
@@ -260,6 +260,7 @@
             + result.extend.pageInfo.pages + "页，总" + result.extend.pageInfo.total + "条记录")
 
         totalRecord=result.extend.pageInfo.total;
+        currentPage=result.extend.pageInfo.pageNum;
 
     }
 
@@ -377,7 +378,7 @@
             success:function(result){
                 if(result.code==100){
                     //调用函数以指定的格式显示提示信息
-                    show_validate_msg("#empName_add_input","success","学生姓名可用");
+                    show_validate_msg("#empName_add_input","success","用户名可用");
                     //如果用户名可用，才让其保存，保存按钮添加属性
                     $("#emp_save_btn").attr("ajax-va","success");
                 }else{
@@ -389,50 +390,56 @@
         });
     });
 
-
     //点击新增按钮弹出模态框
     $("#emp_add_modal_btn").click(function(){
 
+
         //清除表单数据
-        $("#empAddModal form")[0].reset()
+        reset_form("#empAddModal form")
         //调用函数清除模态框的所有数据数据，防止上一次信息残留
         //  reset_form("#empAddModal form");
         $("#empAddModal select").empty()
 
         //调用函数发送ajax请求，查出社团信息，显示在下拉列表(select标签)中
-        getDepts();
+        getDepts("#empAddModal select");
 
-        //弹出添加学生的模态框(Bootstrap代码)
+        //弹出添加用户的模态框(Bootstrap代码)
         $("#empAddModal").modal({
             backdrop:"static"
         });
 
     });
 
-    //添加学生模态框的保存按钮的单击事件
+    //添加用户模态框的保存按钮的单击事件
     $("#emp_save_btn").click(function () {
 
 
-        //1.先对要提交给服务器的数据进行校验
-        if(!validate_add_form()){
-            return false;
-        };
-
-        //判断之前的用户名校验是否成功，如果成功才继续往下执行
-        if($(this).attr("ajax-va")=="error"){
-            return false;
-        }
-
-        //2.模态框中的表单数据提交给服务器保存,发送ajax请求保存员工
+        //模态框中的表单数据提交给服务器保存,发送ajax请求保存员工
         $.ajax({
             url:"${APP_PATH}/emp",
             type:"POST",
             data:$("#empAddModal form").serialize(),
             success:function (result) {
+                if(result.code==100){
                 //1.关闭模态框(Bootstrap代码)
                 $("#empAddModal").modal('hide');
                 //来到最后一页，显示刚才保存的数据
                 to_page(totalRecord);
+            }
+                else{
+                    //有哪个错误信息就显示哪个错误信息
+                    if(undefined!=result.extend.errorFields.email){
+                        //显示邮箱错误信息
+                        show_validate_msg("#email_add_input", "error", result.extend.errorFields.email);
+
+                    }
+
+                    if(undefined!=result.extend.errorFields.empName){
+                        //显示员工名错误信息
+                        show_validate_msg("#empName_add_input", "success",result.extend.errorFields.empName);
+                    }
+                }
+
             }
         })
 
@@ -440,7 +447,10 @@
     })
 
     //查出所有部门信息并显示在下拉列表中
-    function getDepts() {
+    function getDepts(ele) {
+        //清空下拉列表的值
+        $(ele).empty();
+
         $.ajax({
             url:"${APP_PATH}/depts",
             type:"GET",
@@ -448,7 +458,7 @@
                 //遍历获取到的所有部门信息，显示在下拉列表中
                 $.each(result.extend.depts,function(){
                     var optionEle = $("<option></option>").append(this.deptName).attr("value",this.deptId);
-                    optionEle.appendTo("#empAddModal select");
+                    optionEle.appendTo(ele);
                 });
             }
         })
@@ -487,9 +497,117 @@
 
     }
 
+    //清空表单内容和样式
+    function reset_form(ele) {
+        //清空表单内容
+        $(ele)[0].reset()
+        //清空表单样式
+        $(ele).find("*").removeClass("has-error has-success")
+        $(ele).find(".help-block").text("")
+    }
+
+
+
+    <%--************************************************************************************************************************************************--%>
+
+    <!-- 修改功能 -->
+
+    //为编辑按钮添加单击事件，弹出模态框
+
+    //不能直接使用click为编辑按钮绑定单击事件
+    //因为编辑按钮是在页面加载完成事件中添加的，单击事件早于页面加载事件被绑定
+    //相当于还没有加载出来按钮就为其绑定了事件，故使用on来绑定事件
+
+    //为页面中对应class属性的按钮添加单击事件
+    $(document).on("click",".edit_btn",function(){
+
+        //1、查出社团信息，并显示社团列表
+        getDepts("#empUpdateModal select");
+
+        //2、查出学生信息，显示学生信息
+        getEmp($(this).attr("edit-id"));
+
+        // 3、把学生的id传递给模态框中的更新按钮，
+        // 之前编辑按钮的edit-id属性已传入对应的学生id
+        $("#emp_update_btn").attr("edit-id",$(this).attr("edit-id"));
+
+        //4. 弹出修改信息的模态框(Bootstrap代码)
+        $("#empUpdateModal").modal({
+            backdrop:"static"
+        });
+    });
+
+    //点击模态框中的更新，更新学生信息
+    $("#emp_update_btn").click(function(){
+
+        //1. 验证邮箱是否合法
+        var email = $("#email_update_input").val();
+        var regEmail = /^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/;
+        if(!regEmail.test(email)){
+            show_validate_msg("#email_update_input", "error", "邮箱格式不正确");
+            return false;
+        }else{
+            show_validate_msg("#email_update_input", "success", "");
+        }
+
+        //2. 发送ajax请求保存更新的学生数据
+        $.ajax({
+            url:"${APP_PATH}/emp/"+$(this).attr("edit-id"),
+            //web.xml中已添加过滤器，可直接发送PUT请求
+            type:"PUT",
+            data:$("#empUpdateModal form").serialize(),
+            success:function(result){
+                //1、关闭对话框
+                $("#empUpdateModal").modal("hide");
+
+                //2、回到本页面(定义变量保存了当前页面的页码号)
+                to_page(currentPage);
+            }
+        });
+    });
+
+    //查出学生信息
+    function getEmp(id) {
+        $.ajax({
+            url:"${APP_PATH}/emp/"+id,
+            type:"GET",
+            success:function(result){
+                var empData = result.extend.emp;
+                $("#empName_update_static").text(empData.empName);
+                $("#email_update_input").val(empData.email);
+                $("#empUpdateModal input[name=gender]").val([empData.gender]);
+                $("#empUpdateModal select").val([empData.dId]);
+            }
+        });
+    }
+
     <%--************************************************************************************************************************************************--%>
 
 
+    <!-- 删除功能开始 -->
+
+    //为单个删除绑定单击事件
+    $(document).on("click",".delete_btn",function(){
+        //1、弹出是否确认删除对话框
+        var empName = $(this).parents("tr").find("td:eq(1)").text();
+        var empId = $(this).attr("del-id");
+        if(confirm("确认删除【"+empName+"】吗？")){
+            //确认，发送ajax请求删除即可
+            $.ajax({
+                url:"${APP_PATH}/emp/"+empId,
+                type:"DELETE",
+                success:function(result){
+                    //显示处理成功
+                    alert(result.msg);
+                    //回到本页
+                    to_page(currentPage);
+                }
+            });
+        }
+    });
+
+
+    <%--************************************************************************************************************************************************--%>
 
 
 

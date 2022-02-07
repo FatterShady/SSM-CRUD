@@ -5,6 +5,7 @@ import com.wxr.crud.bean.EmployeeExample;
 import com.wxr.crud.dao.EmployeeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -48,5 +49,31 @@ public class EmployeeService {
         criteria.andEmpNameEqualTo(empName);
         long count = employeeMapper.countByExample(employeeExample);
         return count == 0;
+    }
+
+    /**
+     * 根据id查询员工信息
+     * @param id
+     * @return
+     */
+    public Employee getEmp( Integer id) {
+        Employee employee = employeeMapper.selectByPrimaryKey(id);
+        return employee;
+    }
+
+    /**
+     * 更新员工信息
+     * @param employee
+     */
+    public void updateEmp(Employee employee) {
+        employeeMapper.updateByPrimaryKeySelective(employee);
+    }
+
+    /**
+     * 删除员工信息
+     * @param empId
+     */
+    public void deleteEmp(Integer empId) {
+        employeeMapper.deleteByPrimaryKey(empId);
     }
 }
